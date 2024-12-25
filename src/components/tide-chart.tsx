@@ -8,6 +8,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {
+  CartesianGrid,
   Line,
   LineChart,
   ResponsiveContainer,
@@ -16,18 +17,34 @@ import {
   YAxis,
 } from "recharts";
 
-const data = [
-  { time: "00:00", height: 1.2 },
-  { time: "03:00", height: 2.5 },
-  { time: "06:00", height: 1.8 },
-  { time: "09:00", height: 0.5 },
-  { time: "12:00", height: 1.0 },
-  { time: "15:00", height: 2.2 },
-  { time: "18:00", height: 1.9 },
-  { time: "21:00", height: 0.8 },
-];
+import { useTides } from "@/hooks/useTides";
+
+const convertISOToTime = (isoString: string) => {
+  const date = new Date(isoString);
+  return date.toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "numeric",
+  });
+};
 
 export function TideChart() {
+  const { data, error, isPending } = useTides();
+
+  if (isPending) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Error: {error.message}</div>;
+  }
+
+  const _data = data.predictions.map(
+    (prediction: { t: string; v: string }) => ({
+      time: convertISOToTime(prediction.t),
+      height: prediction.v,
+    })
+  );
+
   return (
     <Card>
       <CardHeader>
@@ -35,17 +52,19 @@ export function TideChart() {
         <CardDescription>Today's tide levels</CardDescription>
       </CardHeader>
       <CardContent className="pb-4">
-        <div className="h-[200px]">
+        <div className="h-[400px]">
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={data}>
+            <LineChart data={_data}>
               <XAxis dataKey="time" />
               <YAxis />
+              <CartesianGrid />
               <Tooltip />
               <Line
                 type="monotone"
                 dataKey="height"
                 stroke="#0ea5e9"
                 strokeWidth={2}
+                dot={false}
               />
             </LineChart>
           </ResponsiveContainer>
