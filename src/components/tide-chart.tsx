@@ -45,14 +45,25 @@ export function TideChart() {
     })
   );
 
+  const todaysDate = new Date().toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  });
+
+  // TODO: Implement tide direction based on current time
+  const isRising = true;
+
   return (
-    <Card>
+    <Card className="p-4 h-[400px] bg-zinc-50">
       <CardHeader>
-        <CardTitle>Tide Chart</CardTitle>
-        <CardDescription>Today's tide levels</CardDescription>
+        <CardTitle className="text-xl font-semibold">{todaysDate}</CardTitle>
+        <CardDescription className="text-sm">{`The tide is currently ${
+          isRising ? "rising" : "falling"
+        } in Berkeley, CA.`}</CardDescription>
       </CardHeader>
-      <CardContent className="pb-4">
-        <div className="h-[400px]">
+      <CardContent>
+        <div className="h-[240px]">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={_data}>
               <XAxis dataKey="time" />
