@@ -18,16 +18,15 @@ import {
   ReferenceLine,
   ResponsiveContainer,
   XAxis,
+  YAxis,
 } from "recharts";
 
 import { useTideContinuum } from "@/hooks/useTideContinuum";
 import { useTideHiLo } from "@/hooks/useTideHiLo";
+import moment from "moment";
 
-const convertISOToSimpleHour = (isoString: string) => {
-  const date = new Date(isoString);
-  return date.toLocaleTimeString("en-US", {
-    hour: "numeric",
-  });
+const convertISOToUnix = (isoString: string) => {
+  return new Date(isoString).getTime();
 };
 
 interface IHiLoPrediction {
@@ -56,12 +55,29 @@ export function TideChart() {
     );
   }
 
-  const _data = data?.predictions?.map(
-    (prediction: { t: string; v: string }) => ({
-      time: prediction.t,
-      height: prediction.v,
+  const _data =
+    data?.predictions?.map((prediction) => ({
+      time: convertISOToUnix(prediction.t),
+      height: Number(prediction.v),
+    })) ?? [];
+
+  const formattedHiLoData = hiLoData?.predictions?.map(
+    (prediction: IHiLoPrediction) => ({
+      time: convertISOToUnix(prediction.t),
+      height: Number(prediction.v),
     })
   );
+
+  const combinedData = [..._data, ...formattedHiLoData].sort(
+    (a, b) => a.time - b.time
+  );
+
+  const tideHeights = _data.map((d) => d.height);
+
+  const maxTideHeight = Math.max(...tideHeights);
+  const minTideHeight = Math.min(...tideHeights);
+
+  const range = [Math.floor(minTideHeight) - 1, Math.ceil(maxTideHeight) + 1];
 
   const chartConfig = {
     height: {
@@ -75,27 +91,39 @@ export function TideChart() {
     day: "numeric",
   });
 
-  // TODO: Implement tide direction based on current time
+  const now = new Date().getTime();
+
   const isRising = true;
+
+  const generateHourlyTicks = () => {
+    const startOfDay = moment().startOf("day").valueOf(); // Start of the current day in Unix time
+    const ticks = [];
+    for (let i = 0; i <= 24; i++) {
+      ticks.push(startOfDay + i * 60 * 60 * 1000); // Add an hour in milliseconds
+    }
+    return ticks;
+  };
 
   return (
     <Card className="h-[400px] bg-zinc-50">
-      <CardHeader className="mb-7">
+      <CardHeader className="mb-0">
         <CardTitle className="text-xl font-semibold">{todaysDate}</CardTitle>
         <CardDescription className="text-sm">{`The tide is currently ${
           isRising ? "rising" : "falling"
-        } in Berkeley, CA`}</CardDescription>
+        } at the Berkeley Marina`}</CardDescription>
       </CardHeader>
       <CardContent className="p-0">
-        <div className="h-[250px] p-0">
+        <div className="h-[250px] p-0 overflow-visible">
           <ResponsiveContainer width="100%" height="100%">
             <ChartContainer config={chartConfig}>
               <AreaChart
                 accessibilityLayer
-                data={_data}
+                data={combinedData}
                 margin={{
-                  left: 12,
-                  right: 12,
+                  top: 18,
+                  left: 20,
+                  right: 20,
+                  bottom: 0,
                 }}
               >
                 <CartesianGrid
@@ -105,45 +133,76 @@ export function TideChart() {
                 />
                 <XAxis
                   dataKey="time"
-                  axisLine={false} // Hide the axis line
-                  interval={14}
-                  tickLine={true}
-                  tickFormatter={(value, index) => {
-                    return index % 2 === 0 && index !== 0
-                      ? convertISOToSimpleHour(value)
+                  type="number"
+                  domain={["dataMin", "dataMax"]}
+                  ticks={generateHourlyTicks()}
+                  tickFormatter={(value) => {
+                    const hour = moment(value).hour();
+                    return hour % 3 === 0 && hour !== 0
+                      ? moment(value).format("ha")
                       : "";
                   }}
-                  tickMargin={8}
+                  tickLine={{
+                    stroke: "#ccc",
+                    strokeWidth: 1,
+                    transform: "translate(0, -8)",
+                  }} // Custom tick line style and size
+                  axisLine={false}
                 />
-                {/* Need to interpolate between the gaps, to have a proper continuum of tide values for the below to work */}
-                {/* The problem is that the hilo data might fall outside of the provided tide predictions */}
-                {/* <ReferenceLine x={"2024-12-26 08:02"} /> */}
-
+                <YAxis
+                  hide={true}
+                  domain={range}
+                  tickLine={false}
+                  axisLine={false}
+                />
+                <ReferenceLine
+                  x={now}
+                  segment={[
+                    { x: now, y: range[0] },
+                    { x: now, y: range[1] },
+                  ]}
+                  label={{
+                    position: "top",
+                    value: "Now",
+                    fontSize: 14,
+                    fontWeight: "bold",
+                  }}
+                />
                 {hiLoData?.predictions?.map((prediction: IHiLoPrediction) => {
                   return (
                     <ReferenceLine
-                      key={prediction.t} // Use unique time as the key
-                      x={prediction.t} // ReferenceLine at the time of the tide event
-                      stroke={prediction.type === "H" ? "blue" : "red"} // Different colors for high/low tides
+                      key={prediction.t}
+                      stroke={prediction.type === "H" ? "blue" : "red"}
                       label={{
-                        value: `${
-                          prediction.type === "H" ? "High" : "Low"
-                        } Tide`,
+                        value: `${prediction.v}ft`,
                         position: "top",
                         fontSize: 12,
-                        fill: prediction.type === "H" ? "blue" : "red",
+                        fontWeight: "bold",
+                        offset: 10,
                       }}
+                      segment={[
+                        {
+                          x: convertISOToUnix(prediction.t),
+                          y: range[0],
+                        },
+                        {
+                          x: convertISOToUnix(prediction.t),
+                          y: Number(prediction.v),
+                        },
+                      ]}
                     />
                   );
                 })}
                 <ChartTooltip
-                  cursor={false}
-                  content={<ChartTooltipContent indicator="line" />}
+                  content={
+                    <ChartTooltipContent nameKey="height" indicator="line" />
+                  }
                 />
                 <Area
                   dataKey="height"
+                  baseValue={"dataMin"}
                   type="monotone"
-                  stroke="#000"
+                  stroke="#555"
                   strokeWidth={1}
                   fillOpacity={0.2}
                 />
