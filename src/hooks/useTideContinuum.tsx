@@ -13,7 +13,7 @@ export const useTideContinuum: () => ITideContinuum = () => {
     queryKey: ["tides"],
     queryFn: async () => {
       const response = await fetch(
-        `${baseUrl}?product=predictions&date=today&station=9414816&datum=MLLW&units=english&time_zone=lst_ldt&format=json`
+        `${baseUrl}?product=predictions&date=today&station=9414816&datum=MLLW&units=english&time_zone=lst_ldt&format=json&interval=1`
       );
 
       return await response.json();

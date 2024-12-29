@@ -23,11 +23,9 @@ import {
 
 import { useTideContinuum } from "@/hooks/useTideContinuum";
 import { useTideHiLo } from "@/hooks/useTideHiLo";
+import { generateHourlyTicks } from "@/util/graphing";
+import { convertISOToUnix } from "@/util/time";
 import moment from "moment";
-
-const convertISOToUnix = (isoString: string) => {
-  return new Date(isoString).getTime();
-};
 
 interface IHiLoPrediction {
   t: string;
@@ -95,17 +93,8 @@ export function TideChart() {
 
   const isRising = true;
 
-  const generateHourlyTicks = () => {
-    const startOfDay = moment().startOf("day").valueOf(); // Start of the current day in Unix time
-    const ticks = [];
-    for (let i = 0; i <= 24; i++) {
-      ticks.push(startOfDay + i * 60 * 60 * 1000); // Add an hour in milliseconds
-    }
-    return ticks;
-  };
-
   return (
-    <Card className="h-[400px] bg-zinc-50">
+    <Card className="h-[400px]">
       <CardHeader className="mb-0">
         <CardTitle className="text-xl font-semibold">{todaysDate}</CardTitle>
         <CardDescription className="text-sm">{`The tide is currently ${
@@ -172,7 +161,7 @@ export function TideChart() {
                   return (
                     <ReferenceLine
                       key={prediction.t}
-                      stroke={prediction.type === "H" ? "blue" : "red"}
+                      // stroke={prediction.type === "H" ? "blue" : "red"}
                       label={{
                         value: `${prediction.v}ft`,
                         position: "top",
@@ -197,6 +186,7 @@ export function TideChart() {
                   content={
                     <ChartTooltipContent nameKey="height" indicator="line" />
                   }
+                  // position={{ y: -24 }}
                 />
                 <Area
                   dataKey="height"
