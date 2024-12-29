@@ -1,5 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
 
+export interface ITideHiLo {
+  predictions: {
+    t: string;
+    v: string;
+    type: "H" | "L";
+  }[];
+}
+
 export const useTideHiLo = () => {
   const baseUrl = "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter";
 
@@ -14,5 +22,12 @@ export const useTideHiLo = () => {
     },
   });
 
-  return { isPending, error, data, isFetching };
+  const result = {
+    isPending,
+    error,
+    data: data as ITideHiLo,
+    isFetching,
+  };
+
+  return result;
 };
