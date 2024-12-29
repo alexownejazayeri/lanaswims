@@ -17,7 +17,7 @@ export const SpotSummary: React.FC<ISpotSummaryProps> = ({
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-xl">Spot Summary</CardTitle>
+        <CardTitle className="text-xl">Today's Spot Summary</CardTitle>
       </CardHeader>
       <CardContent>
         <ul className="space-y-2">

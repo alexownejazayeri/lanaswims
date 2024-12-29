@@ -75,11 +75,11 @@ export function TideChart() {
   const maxTideHeight = Math.max(...tideHeights);
   const minTideHeight = Math.min(...tideHeights);
 
-  const range = [Math.floor(minTideHeight) - 1, Math.ceil(maxTideHeight) + 1];
+  const range = [Math.floor(minTideHeight) - 1, Math.ceil(maxTideHeight) + 8];
 
   const chartConfig = {
     height: {
-      label: "Tide Height (ft)",
+      // label: "Tide Height (ft)",
     },
   } satisfies ChartConfig;
 
@@ -135,7 +135,7 @@ export function TideChart() {
                     stroke: "#ccc",
                     strokeWidth: 1,
                     transform: "translate(0, -8)",
-                  }} // Custom tick line style and size
+                  }}
                   axisLine={false}
                 />
                 <YAxis
@@ -161,13 +161,14 @@ export function TideChart() {
                   return (
                     <ReferenceLine
                       key={prediction.t}
-                      // stroke={prediction.type === "H" ? "blue" : "red"}
+                      stroke={prediction.type === "H" ? "#66D74F" : "#F14B4B"}
                       label={{
                         value: `${prediction.v}ft`,
                         position: "top",
                         fontSize: 12,
                         fontWeight: "bold",
                         offset: 10,
+                        fill: "#333",
                       }}
                       segment={[
                         {
@@ -186,7 +187,6 @@ export function TideChart() {
                   content={
                     <ChartTooltipContent nameKey="height" indicator="line" />
                   }
-                  // position={{ y: -24 }}
                 />
                 <Area
                   dataKey="height"
