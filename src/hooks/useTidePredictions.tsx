@@ -1,12 +1,8 @@
-import { UseQueryResult, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 
-type ITidePredictionData = { t: string; v: string }[];
-interface ITideContinuum
-  extends Pick<UseQueryResult, "isPending" | "error" | "isFetching"> {
-  data?: { predictions: ITidePredictionData };
-}
+type ITidePredictions = { predictions: { t: string; v: string }[] };
 
-export const useTideContinuum: () => ITideContinuum = () => {
+export const useTidePredictions = () => {
   const baseUrl = "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter";
 
   const { isPending, error, data, isFetching } = useQuery({
@@ -20,5 +16,12 @@ export const useTideContinuum: () => ITideContinuum = () => {
     },
   });
 
-  return { isPending, error, data, isFetching };
+  const result = {
+    isPending,
+    error,
+    data: data as ITidePredictions,
+    isFetching,
+  };
+
+  return result;
 };

@@ -21,8 +21,8 @@ import {
   YAxis,
 } from "recharts";
 
-import { useTideContinuum } from "@/hooks/useTideContinuum";
 import { useTideHiLo } from "@/hooks/useTideHiLo";
+import { useTidePredictions } from "@/hooks/useTidePredictions";
 import { generateHourlyTicks } from "@/util/graphing";
 import { convertISOToUnix } from "@/util/time";
 import moment from "moment";
@@ -34,7 +34,7 @@ interface IHiLoPrediction {
 }
 
 export function TideChart() {
-  const { data, error, isPending } = useTideContinuum();
+  const { data, error, isPending } = useTidePredictions();
   const {
     data: hiLoData,
     error: hiLoError,
@@ -144,6 +144,19 @@ export function TideChart() {
                   tickLine={false}
                   axisLine={false}
                 />
+                {/* TODO: add these reference areas for sunrise/sunset */}
+                {/* <ReferenceArea
+                  x1={combinedData[0].time}
+                  x2={combinedData[100].time}
+                  y1={range[0]}
+                  y2={range[1]}
+                />
+                <ReferenceArea
+                  x1={combinedData[800].time}
+                  x2={combinedData[combinedData.length - 1].time}
+                  y1={range[0]}
+                  y2={range[1]}
+                /> */}
                 <ReferenceLine
                   x={now}
                   segment={[
