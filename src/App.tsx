@@ -2,9 +2,9 @@ import "./App.css";
 
 import { MapPin } from "lucide-react";
 import { HiLo } from "./components/hi-lo";
-import { NextLowTide } from "./components/next-low-tide";
 import { SpotSummary } from "./components/spot-summary";
 import { TideChart } from "./components/tide-chart";
+import { TideCountdown } from "./components/tide-countdown";
 import { TopNavigation } from "./components/top-navigation";
 import { useSunlight } from "./hooks/useSunlight";
 import { useTideHiLo } from "./hooks/useTideHiLo";
@@ -17,6 +17,9 @@ function App() {
 
   let nextHighTide = "tomorrow";
   let nextLowTide = "tomorrow";
+
+  let nextTideTime: "tomorrow" | Date = "tomorrow";
+  let nextTideType: "low" | "high" = "low";
 
   for (const prediction of data?.predictions ?? []) {
     const currTime = new Date(prediction.t).getTime();
@@ -52,6 +55,17 @@ function App() {
     }
   }
 
+  for (const prediction of data?.predictions ?? []) {
+    const currTime = new Date(prediction.t).getTime();
+
+    if (currTime > now) {
+      const time = new Date(prediction.t);
+      nextTideTime = time;
+      nextTideType = prediction.type === "H" ? "high" : "low";
+      break;
+    }
+  }
+
   const sunrise = sunlightData?.results?.sunrise;
   const sunset = sunlightData?.results?.sunset;
 
@@ -81,7 +95,10 @@ function App() {
                 sunset={sunset}
               />
               <HiLo />
-              <NextLowTide />
+              <TideCountdown
+                nextTideTime={nextTideTime}
+                nextTideType={nextTideType}
+              />
             </div>
           </div>
         </div>
