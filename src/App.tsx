@@ -73,7 +73,7 @@ function App() {
     <div className="flex flex-col min-h-screen">
       <TopNavigation />
       <main className="flex flex-col items-center">
-        <div className="container py-12 max-w-[1200px]">
+        <div className="container py-6 max-w-[1200px]">
           <h1 className="text-4xl font-bold mb-2">
             Berkeley Marina Tide Chart
           </h1>
@@ -85,7 +85,7 @@ function App() {
           </div>
           <div>
             <div className="mb-6">
-              <TideChart />
+              <TideChart isRising={nextTideType === "high"} />
             </div>
             <div className="flex flew-row justify-between gap-6">
               <SpotSummary

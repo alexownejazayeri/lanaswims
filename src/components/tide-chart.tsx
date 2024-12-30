@@ -27,13 +27,11 @@ import { generateHourlyTicks } from "@/util/graphing";
 import { convertISOToUnix } from "@/util/time";
 import moment from "moment";
 
-interface IHiLoPrediction {
-  t: string;
-  v: string;
-  type: "H" | "L";
+interface TideChartProps {
+  isRising: boolean;
 }
 
-export function TideChart() {
+export const TideChart: React.FC<TideChartProps> = ({ isRising }) => {
   const { data, error, isPending } = useTidePredictions();
   const {
     data: hiLoData,
@@ -59,12 +57,10 @@ export function TideChart() {
       height: Number(prediction.v),
     })) ?? [];
 
-  const formattedHiLoData = hiLoData?.predictions?.map(
-    (prediction: IHiLoPrediction) => ({
-      time: convertISOToUnix(prediction.t),
-      height: Number(prediction.v),
-    })
-  );
+  const formattedHiLoData = hiLoData?.predictions?.map((prediction) => ({
+    time: convertISOToUnix(prediction.t),
+    height: Number(prediction.v),
+  }));
 
   const combinedData = [..._data, ...formattedHiLoData].sort(
     (a, b) => a.time - b.time
@@ -91,10 +87,8 @@ export function TideChart() {
 
   const now = new Date().getTime();
 
-  const isRising = true;
-
   return (
-    <Card className="h-[400px]">
+    <Card className="h-[356px]">
       <CardHeader className="mb-0">
         <CardTitle className="text-xl font-semibold">{todaysDate}</CardTitle>
         <CardDescription className="text-sm">{`The tide is currently ${
@@ -170,7 +164,7 @@ export function TideChart() {
                     fontWeight: "bold",
                   }}
                 />
-                {hiLoData?.predictions?.map((prediction: IHiLoPrediction) => {
+                {hiLoData?.predictions?.map((prediction) => {
                   return (
                     <ReferenceLine
                       key={prediction.t}
@@ -216,4 +210,4 @@ export function TideChart() {
       </CardContent>
     </Card>
   );
-}
+};
