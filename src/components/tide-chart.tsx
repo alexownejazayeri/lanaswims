@@ -23,6 +23,7 @@ import {
 
 import { useTideHiLo } from "@/hooks/useTideHiLo";
 import { useTidePredictions } from "@/hooks/useTidePredictions";
+import { useWeather } from "@/hooks/useWeather";
 import { generateHourlyTicks } from "@/util/graphing";
 import { convertISOToUnix } from "@/util/time";
 import moment from "moment";
@@ -38,6 +39,10 @@ export const TideChart: React.FC<TideChartProps> = ({ isRising }) => {
     error: hiLoError,
     isPending: hiLoIsPending,
   } = useTideHiLo();
+
+  const { data: weatherData } = useWeather();
+
+  console.log({ weatherData });
 
   if (isPending || hiLoIsPending) {
     return <div>Loading...</div>;
@@ -164,6 +169,7 @@ export const TideChart: React.FC<TideChartProps> = ({ isRising }) => {
                     fontWeight: "bold",
                   }}
                 />
+
                 {hiLoData?.predictions?.map((prediction) => {
                   return (
                     <ReferenceLine
