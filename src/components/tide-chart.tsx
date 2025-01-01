@@ -164,6 +164,8 @@ export const TideChart: React.FC<TideChartProps> = ({ isRising }) => {
                     fontWeight: "bold",
                   }}
                 />
+                <ReferenceLine y={2.85} stroke="#333" strokeWidth={0.5} />
+
                 {hiLoData?.predictions?.map((prediction) => {
                   return (
                     <ReferenceLine
